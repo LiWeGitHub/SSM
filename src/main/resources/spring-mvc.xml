@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
@@ -10,7 +11,36 @@
     <context:component-scan base-package="com.lw.controller"/>
     <!-- 定义跳转的文件的前后缀 ，视图模式配置 -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="prefix" value="/WEB-INF/jsp/"/>
         <property name="suffix" value=".jsp"/>
+    </bean>
+    <!--拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/*/**"/>
+            <bean class="com.lw.filter.MyInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    <mvc:annotation-driven/>
+    <!--配置触发器-->
+    <!--定时器任务类配置-->
+    <bean id="printInfoTask" class="com.lw.task.PrintInfoTask"/>
+    <!--配置定时器代理类-->
+    <bean id="printInfoHelloTask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="printInfoTask"/>
+        <property name="targetMethod" value="printInfo"/>
+    </bean>
+    <!--配置触发器类-->
+    <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="printInfoHelloTask"/>
+        <property name="cronExpression" value="0/1 * * * * ?"/>
+    </bean>
+    <!--配置调度器-->
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="cronTrigger"/>
+            </list>
+        </property>
     </bean>
 </beans>
