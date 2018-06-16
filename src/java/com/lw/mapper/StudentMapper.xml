@@ -8,7 +8,7 @@
         SELECT
         name
         FROM
-        t_stu
+        user
         WHERE
         id = #{id}
     </select>
